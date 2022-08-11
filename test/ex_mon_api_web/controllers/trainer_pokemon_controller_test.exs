@@ -1,7 +1,7 @@
 defmodule ExMonApiWeb.TrainerPokemonControllerTest do
   use ExMonApiWeb.ConnCase
 
-  alias ExMonApi.Trainer
+  alias ExMonApi.{Trainer, Repo}
   alias Trainer.Pokemon
 
   describe "show/2" do
@@ -112,10 +112,91 @@ defmodule ExMonApiWeb.TrainerPokemonControllerTest do
   end
 
   describe "delete/2" do
+    test "when the pokemon exist deletes it from database", %{conn: conn} do
+      {:ok, %Trainer{id: trainer_id}} = ExMonApi.create_trainer(%{name: "Adan", password: "12345678"})
+      {:ok, %Pokemon{id: pokemon_id}} =
+        ExMonApi.create_trainer_pokemon(%{
+          "name" => "pikachu",
+          "trainer_id" => trainer_id,
+          "nickname" => "Pikachu"
+        })
 
+      count_before = Repo.aggregate(Pokemon, :count)
+
+      response = conn
+      |> delete(Routes.trainer_pokemon_path(conn, :delete, pokemon_id))
+      |> json_response(:no_content)
+
+      count_after = Repo.aggregate(Pokemon, :count)
+
+      assert {:ok, _result } = response
+      assert count_after < count_before
+    end
+
+    test "when the pokemon is not found, returns the error with status 404", %{conn: conn} do
+      response = conn
+      |> delete(Routes.trainer_pokemon_path(conn, :delete, Ecto.UUID.generate()))
+      |> json_response(:not_found)
+
+      assert response == %{"message" => "Pokemon not found!"}
+    end
+
+    test "when there's a validation error, returns the error with status 400", %{conn: conn} do
+      response =
+        conn
+        |> delete(Routes.trainer_pokemon_path(conn, :delete, "invalid_id"))
+        |> json_response(:bad_request)
+
+      expected_response = %{"message" => "Invalid ID format"}
+
+      assert response == expected_response
+    end
   end
 
   describe "update/2" do
-    
+    test "when the pokemon exists, updates it's nickname", %{conn: conn} do
+      {:ok, %Trainer{id: trainer_id}} = ExMonApi.create_trainer(%{name: "Adan", password: "12345678"})
+      {:ok, %Pokemon{id: pokemon_id}} =
+        ExMonApi.create_trainer_pokemon(%{
+          "name" => "pikachu",
+          "trainer_id" => trainer_id,
+          "nickname" => "Pikachu"
+        })
+
+      response = conn
+      |> put(Routes.trainer_pokemon_path(conn, :update, %{"id" => pokemon_id, "nickname" => "Lighty"}))
+      |> json_response(:ok)
+
+      assert %{
+        "trainer" => %{
+          "id" => _id,
+          "inserted_at" => _inserted_at,
+          "name" => "pikachu",
+          "nickname" => "Lighty",
+          "trainer_id" => _trainer_id,
+          "types" => ["electric"],
+          "weight" => 60
+        }
+      } = response
+    end
+
+    test "when the pokemon is not found, returns the error with status 404", %{conn: conn} do
+      response = conn
+      |> put(Routes.trainer_pokemon_path(conn, :update, Ecto.UUID.generate()))
+      |> json_response(:not_found)
+
+      assert response == %{"message" => "Pokemon not found!"}
+    end
+
+    test "when there's a validation error, returns the error with status 400", %{conn: conn} do
+      response =
+        conn
+        |> put(Routes.trainer_pokemon_path(conn, :update, "invalid_id"))
+        |> json_response(:bad_request)
+
+      expected_response = %{"message" => "Invalid ID format"}
+
+      assert response == expected_response
+    end
   end
 end
