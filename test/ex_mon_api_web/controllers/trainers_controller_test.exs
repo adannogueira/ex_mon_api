@@ -1,7 +1,7 @@
 defmodule ExMonApiWeb.TrainersControllerTest do
   use ExMonApiWeb.ConnCase
 
-  alias ExMonApi.Trainer
+  alias ExMonApi.{Trainer, Repo}
 
   describe "show/2" do
     test "when there's a trainer, returns the trainer", %{conn: conn} do
@@ -40,7 +40,7 @@ defmodule ExMonApiWeb.TrainersControllerTest do
 
   describe "create/2" do
     test "when all data is correct, creates a trainer", %{conn: conn} do
-      response = conn
+      %{"trainer" => response, "message" => _message} = conn
       |> post(Routes.trainers_path(conn, :create, %{name: "Adan", password: "12345678"}))
       |> json_response(:created)
 
@@ -54,13 +54,12 @@ defmodule ExMonApiWeb.TrainersControllerTest do
 
       count_before = Repo.aggregate(Trainer, :count)
 
-      response = conn
+      conn = conn
       |> delete(Routes.trainers_path(conn, :delete, trainer_id))
-      |> json_response(:no_content)
 
       count_after = Repo.aggregate(Trainer, :count)
 
-      assert {:ok, _result } = response
+      assert response(conn, 204)
       assert count_after < count_before
     end
 
@@ -88,8 +87,8 @@ defmodule ExMonApiWeb.TrainersControllerTest do
     test "when the trainer exists, updates it's data", %{conn: conn} do
       {:ok, %Trainer{id: trainer_id}} = ExMonApi.create_trainer(%{name: "Adan", password: "12345678"})
 
-      response = conn
-      |> put(Routes.trainers_path(conn, :update, %{"id" => trainer_id, "name" => "Lighty", "password" => "87654321"}))
+      %{"trainer" => response, "message" => _message} = conn
+      |> put(Routes.trainers_path(conn, :update, trainer_id, %{id: trainer_id, name: "Lighty", password: "87654321"}))
       |> json_response(:ok)
 
       assert %{"id" => _id, "inserted_at" => _inserted_at, "name" => "Lighty"} = response

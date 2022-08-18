@@ -6,6 +6,8 @@ defmodule ExMonApiWeb.TrainerPokemonControllerTest do
 
   describe "show/2" do
     test "when there's a pokemon, returns the pokemon", %{conn: conn} do
+      MockSetup.mock_success("pikachu")
+
       params = %{name: "Adan", password: "12345678"}
 
       {:ok, %Trainer{id: id}} = ExMonApi.create_trainer(params)
@@ -61,6 +63,8 @@ defmodule ExMonApiWeb.TrainerPokemonControllerTest do
 
   describe "create/2" do
     test "when all data is correct, creates a pokemon", %{conn: conn} do
+      MockSetup.mock_success("pikachu")
+
       {:ok, %Trainer{id: id}} = ExMonApi.create_trainer(%{name: "Adan", password: "12345678"})
 
       response = conn
@@ -97,6 +101,8 @@ defmodule ExMonApiWeb.TrainerPokemonControllerTest do
     end
 
     test "when the pokemon is not found, returns the error with status 404", %{conn: conn} do
+      MockSetup.mock_failure("invalid")
+
       {:ok, %Trainer{id: id}} = ExMonApi.create_trainer(%{name: "Adan", password: "12345678"})
 
       response = conn
@@ -113,6 +119,8 @@ defmodule ExMonApiWeb.TrainerPokemonControllerTest do
 
   describe "delete/2" do
     test "when the pokemon exist deletes it from database", %{conn: conn} do
+      MockSetup.mock_success("pikachu")
+
       {:ok, %Trainer{id: trainer_id}} = ExMonApi.create_trainer(%{name: "Adan", password: "12345678"})
       {:ok, %Pokemon{id: pokemon_id}} =
         ExMonApi.create_trainer_pokemon(%{
@@ -123,13 +131,12 @@ defmodule ExMonApiWeb.TrainerPokemonControllerTest do
 
       count_before = Repo.aggregate(Pokemon, :count)
 
-      response = conn
+      conn = conn
       |> delete(Routes.trainer_pokemon_path(conn, :delete, pokemon_id))
-      |> json_response(:no_content)
 
       count_after = Repo.aggregate(Pokemon, :count)
 
-      assert {:ok, _result } = response
+      assert response(conn, 204)
       assert count_after < count_before
     end
 
@@ -142,6 +149,8 @@ defmodule ExMonApiWeb.TrainerPokemonControllerTest do
     end
 
     test "when there's a validation error, returns the error with status 400", %{conn: conn} do
+      MockSetup.mock_success("pikachu")
+
       response =
         conn
         |> delete(Routes.trainer_pokemon_path(conn, :delete, "invalid_id"))
@@ -155,6 +164,8 @@ defmodule ExMonApiWeb.TrainerPokemonControllerTest do
 
   describe "update/2" do
     test "when the pokemon exists, updates it's nickname", %{conn: conn} do
+      MockSetup.mock_success("pikachu")
+
       {:ok, %Trainer{id: trainer_id}} = ExMonApi.create_trainer(%{name: "Adan", password: "12345678"})
       {:ok, %Pokemon{id: pokemon_id}} =
         ExMonApi.create_trainer_pokemon(%{
@@ -163,20 +174,18 @@ defmodule ExMonApiWeb.TrainerPokemonControllerTest do
           "nickname" => "Pikachu"
         })
 
-      response = conn
-      |> put(Routes.trainer_pokemon_path(conn, :update, %{"id" => pokemon_id, "nickname" => "Lighty"}))
+      %{"pokemon" => response, "message" => _message} = conn
+      |> put(Routes.trainer_pokemon_path(conn, :update, pokemon_id, %{id: pokemon_id, nickname: "Lighty"}))
       |> json_response(:ok)
 
       assert %{
-        "trainer" => %{
-          "id" => _id,
-          "inserted_at" => _inserted_at,
-          "name" => "pikachu",
-          "nickname" => "Lighty",
-          "trainer_id" => _trainer_id,
-          "types" => ["electric"],
-          "weight" => 60
-        }
+        "id" => _id,
+        "inserted_at" => _inserted_at,
+        "name" => "pikachu",
+        "nickname" => "Lighty",
+        "trainer_id" => ^trainer_id,
+        "types" => ["electric"],
+        "weight" => 60
       } = response
     end
 
