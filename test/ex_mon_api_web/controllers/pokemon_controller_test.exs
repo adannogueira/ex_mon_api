@@ -3,6 +3,8 @@ defmodule ExMonApiWeb.PokemonControllerTest do
 
   describe "show/2" do
     test "when there's a pokemon, returns the pokemon", %{conn: conn} do
+      MockSetup.mock_success("pikachu")
+
       # To test a route we use the connection (created by the ConnCase)
       response = conn
       |> get(Routes.pokemon_path(conn, :show, "pikachu"))
@@ -12,6 +14,8 @@ defmodule ExMonApiWeb.PokemonControllerTest do
     end
 
     test "when the pokemon is not found, returns the error with status 404", %{conn: conn} do
+      MockSetup.mock_failure("inexistent")
+      
       response = conn
       |> get(Routes.pokemon_path(conn, :show, "inexistent"))
       |> json_response(:not_found)

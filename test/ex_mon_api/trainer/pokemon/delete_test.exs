@@ -6,6 +6,8 @@ defmodule ExMonApi.Trainer.Pokemon.DeleteTest do
 
   describe "call/1" do
     test "deletes a pokemon on success" do
+      MockSetup.mock_success("pikachu")
+
       {:ok, %{id: trainer_id}} = Trainer.Create.call(%{name: "Adan", password: "12345678"})
       params = %{"name" => "pikachu", "nickname" => "Pikachu", "trainer_id" => trainer_id}
       {:ok, %{id: pokemon_id}} = Create.call(params)

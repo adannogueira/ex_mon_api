@@ -6,6 +6,8 @@ defmodule ExMonApi.Trainer.Pokemon.CreateTest do
 
   describe "call/1" do
     test "when all params are valid, creates a pokemon" do
+      MockSetup.mock_success("pikachu")
+
       {:ok, trainer} = Trainer.Create.call(%{name: "Adan", password: "12345678"})
 
       params = %{"name" => "pikachu", "nickname" => "Pikachu", "trainer_id" => Map.get(trainer, :id)}
