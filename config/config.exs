@@ -32,6 +32,10 @@ config :ex_mon_api, ExMonApiWeb.Auth.Guardian,
        issuer: "ex_mon_api",
        secret_key: "W0x41LkvxFTJXYRDVu+MN1GYtjnMF+aoosyyBXcnM6nC05lfOitFGIaz0T4KKqTD"
 
+config :ex_mon_api, ExMonApiWeb.Auth.Pipeline,
+       module: ExMonApiWeb.Auth.Guardian,
+       error_handler: ExMonApiWeb.Auth.ErrorHandler
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

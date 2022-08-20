@@ -5,14 +5,27 @@ defmodule ExMonApiWeb.Router do
     plug :accepts, ["json"] # Accepts only plugged codes
   end
 
+  # All authorization related issues now must be allowed thru the pipeline plugs
+  pipeline :auth do
+    plug ExMonApiWeb.Auth.Pipeline
+  end
+
+  # Public Routes
   # All routes here are piped thru /api/...
   scope "/api", ExMonApiWeb do
     pipe_through :api
     # By default the router will create ALL route types, but you can limit the routes you want
-    resources "/trainers", TrainersController, only: [:create, :show, :delete, :update]
-    resources "/trainer_pokemon", TrainerPokemonController, only: [:create, :show, :delete, :update]
+    post "/trainers", TrainersController, :create
     post "/trainers/signin", TrainersController, :sign_in
     get "/pokemon/:name", PokemonController, :show # We're not building the resources here, just the single GET route
+  end
+
+  # Private Routes (piped thru :auth plugs)
+  scope "/api", ExMonApiWeb do
+    pipe_through [:api, :auth]
+    # By default the router will create ALL route types, but you can limit the routes you want
+    resources "/trainers", TrainersController, only: [:show, :delete, :update]
+    resources "/trainer_pokemon", TrainerPokemonController, only: [:create, :show, :delete, :update]
   end
 
   # Enables LiveDashboard only for development
