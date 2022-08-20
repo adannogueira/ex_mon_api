@@ -3,7 +3,7 @@ defmodule ExMonApiWeb.TrainersView do
 
   alias ExMonApi.Trainer
 
-  def render("create.json", %{trainer: %Trainer{id: id, name: name, inserted_at: inserted_at}}) do
+  def render("create.json", %{trainer: %Trainer{id: id, name: name, inserted_at: inserted_at}, token: token}) do
     # The render response is going to be converted to a json
     %{
       message: "Trainer created",
@@ -11,7 +11,8 @@ defmodule ExMonApiWeb.TrainersView do
         id: id,
         name: name,
         inserted_at: inserted_at
-      }
+      },
+      token: token
     }
   end
 

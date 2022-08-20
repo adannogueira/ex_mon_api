@@ -46,7 +46,8 @@ defmodule ExMonApi.MixProject do
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:argon2_elixir, "~> 2.0"},
       {:tesla, "~> 1.3.3"},
-      {:guardian, "~> 2.2"}
+      {:guardian, "~> 2.2"},
+      {:dotenv_parser, "~> 2.0"}
     ]
   end
 
