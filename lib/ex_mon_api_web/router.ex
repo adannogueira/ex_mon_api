@@ -11,6 +11,7 @@ defmodule ExMonApiWeb.Router do
     # By default the router will create ALL route types, but you can limit the routes you want
     resources "/trainers", TrainersController, only: [:create, :show, :delete, :update]
     resources "/trainer_pokemon", TrainerPokemonController, only: [:create, :show, :delete, :update]
+    post "/trainers/signin", TrainersController, :sign_in
     get "/pokemon/:name", PokemonController, :show # We're not building the resources here, just the single GET route
   end
 
