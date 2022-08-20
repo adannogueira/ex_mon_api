@@ -16,6 +16,7 @@ defmodule ExMonApiWeb.ConnCase do
   """
 
   use ExUnit.CaseTemplate
+  import ExMonApiWeb.Auth.Guardian
 
   using do
     quote do
@@ -38,6 +39,11 @@ defmodule ExMonApiWeb.ConnCase do
       Ecto.Adapters.SQL.Sandbox.mode(ExMonApi.Repo, {:shared, self()})
     end
 
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    params = %{name: "Adan", password: "12345678"}
+    {:ok, trainer} = ExMonApi.create_trainer(params)
+    {:ok, token, _claims} = encode_and_sign(trainer)
+
+    conn = Plug.Conn.put_req_header(Phoenix.ConnTest.build_conn(), "authorization", "Bearer #{token}")
+    {:ok, conn: conn}
   end
 end

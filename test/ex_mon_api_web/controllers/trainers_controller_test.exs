@@ -6,7 +6,6 @@ defmodule ExMonApiWeb.TrainersControllerTest do
   describe "show/2" do
     test "when there's a trainer, returns the trainer", %{conn: conn} do
       params = %{name: "Adan", password: "12345678"}
-
       {:ok, %Trainer{id: id}} = ExMonApi.create_trainer(params)
 
       # To test a route we use the connection (created by the ConnCase)
