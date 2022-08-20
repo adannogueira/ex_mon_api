@@ -36,7 +36,7 @@ defmodule ExMonApiWeb.Auth.Guardian do
   end
 
   defp create_token(trainer) do
-    {:ok, token, _claims} = encode_and_sign(trainer)
+    {:ok, token, _claims} = encode_and_sign(trainer, %{}, ttl: {1, :hour})
     {:ok, token}
   end
 end
